@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1043041897786",
+    "project_id": "foodcatalog-bdeaf",
+    "storage_bucket": "foodcatalog-bdeaf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1043041897786:android:ee28113dbb39d3cbb05403",
+        "android_client_info": {
+          "package_name": "com.example.catalogfood"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJm45zJW4ydWYPJJwJv5IFFRXNBE4yK4k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

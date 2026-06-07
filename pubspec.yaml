@@ -1,0 +1,46 @@
+name: catalogfood
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Icons
+  cupertino_icons: ^1.0.8
+  
+  # Packages
+  get: ^4.6.6
+  supabase_flutter: ^2.6.0
+  flutter_dotenv: ^6.0.0
+  dio: ^5.9.0
+  intl: ^0.20.2
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.0
+  geolocator: ^14.0.2
+  permission_handler: ^12.0.1
+  shared_preferences: ^2.2.2
+  
+  # FIREBASE (Penting ada di sini)
+  firebase_core: ^4.3.0 
+  firebase_messaging: ^16.1.0
+  
+  # Notifikasi (Versi Stabil)
+  flutter_local_notifications: ^19.5.0
+  google_fonts: ^6.3.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/images/
