@@ -14,7 +14,7 @@ This project was developed to fulfill the Mobile Programming course assignment a
 
 ### 💻 Admin Interface (Cashier / Manager)
 <p align="center">
-  <img src="Preview/previewadmin.jpg">
+  <img src="Preview/prviewadmin.jpg">
 </p>
 
 ---
