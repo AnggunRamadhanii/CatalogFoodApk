@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import '../../controllers/map_controller.dart'; 
-import '../widgets/auth_components.dart'; 
-
 class MapPage extends StatelessWidget {
   MapPage({super.key});
   
@@ -11,18 +9,23 @@ class MapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color cardColor = Theme.of(context).cardColor;
+    final Color bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final Color? textColor = Theme.of(context).textTheme.bodyLarge?.color;
+
     return Scaffold(
       body: Stack(
         children: [
           Obx(() {
             if (controller.isLoading.value && controller.currentPosition.value == null) {
               return Container(
-                color: Colors.white,
+                color: bgColor, 
                 child: const Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(color: kPinkPrimary),
+                      CircularProgressIndicator(color: Color.fromARGB(255, 166, 14, 34)),
                       SizedBox(height: 10),
                       Text("Mencari satelit GPS...", style: TextStyle(color: Colors.grey))
                     ],
@@ -47,21 +50,34 @@ class MapPage extends StatelessWidget {
                   userAgentPackageName: 'com.example.catalogfood',
                 ),
 
-                if (controller.currentPosition.value != null)
-                  PolylineLayer(
+                Obx(() {
+                  final currentLoc = controller.currentPosition.value;
+                  final routePts = controller.routePoints;
+
+                  if (currentLoc == null) {
+                    return PolylineLayer(polylines: <Polyline>[]);
+                  }
+
+                  return PolylineLayer(
                     polylines: [
-                      Polyline(
-                        points: [
-                          controller.currentPosition.value!,
-                          controller.canteenLocation,
-                        ],
-                        strokeWidth: 4.0,
-                        color: kPinkPrimary.withValues(alpha: 0.7),
-                        // PERBAIKAN: isDotted diganti dengan pattern
-                        pattern: const StrokePattern.dotted(), 
-                      ),
+                      if (routePts.isNotEmpty)
+                        Polyline(
+                          points: routePts.toList(),
+                          strokeWidth: 5.0,
+                          color: const Color.fromARGB(255, 166, 14, 34), 
+                        )
+                      else
+                        Polyline(
+                          points: [
+                            currentLoc,
+                            controller.canteenLocation,
+                          ],
+                          strokeWidth: 4.0,
+                          color: Colors.grey, 
+                        ),
                     ],
-                  ),
+                  );
+                }),
 
                 CircleLayer(
                   circles: [
@@ -70,7 +86,7 @@ class MapPage extends StatelessWidget {
                       color: Colors.green.withValues(alpha: 0.15),
                       borderStrokeWidth: 2,
                       borderColor: Colors.green,
-                      radius: 50, // 50 Meter
+                      radius: 50, 
                     ),
                   ],
                 ),
@@ -85,10 +101,10 @@ class MapPage extends StatelessWidget {
                         children: [
                           Container(
                             padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: cardColor, 
                               shape: BoxShape.circle,
-                              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
+                              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 8)],
                             ),
                             child: const Icon(Icons.storefront, color: Colors.red, size: 30),
                           ),
@@ -96,11 +112,14 @@ class MapPage extends StatelessWidget {
                             margin: const EdgeInsets.only(top: 4),
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: cardColor, // MENGGUNAKAN WARNA ADAPTIF
                               borderRadius: BorderRadius.circular(8),
-                              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
                             ),
-                            child: const Text("Kantin", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
+                            child: Text(
+                              "Kantin", 
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: textColor) // Teks adaptif
+                            ),
                           ),
                         ],
                       ),
@@ -114,17 +133,17 @@ class MapPage extends StatelessWidget {
                         child: Column(
                           children: [
                             Container(
-                              decoration: BoxDecoration(
-                                color: kPinkPrimary.withValues(alpha: 0.2), 
+                              decoration: const BoxDecoration(
+                                color: Color.fromARGB(255, 166, 14, 34), 
                                 shape: BoxShape.circle,
                               ),
                               padding: const EdgeInsets.all(8),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.blue,
+                                  color: const Color.fromARGB(255, 166, 14, 34),
                                   shape: BoxShape.circle,
                                   border: Border.all(color: Colors.white, width: 3),
-                                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+                                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 5)],
                                 ),
                                 child: const Icon(Icons.person, color: Colors.white, size: 20),
                               ),
@@ -146,11 +165,11 @@ class MapPage extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardColor, 
                   shape: BoxShape.circle,
                   boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)],
                 ),
-                child: const Icon(Icons.arrow_back, color: kTextDark),
+                child: Icon(Icons.arrow_back, color: textColor), 
               ),
             ),
           ),
@@ -162,7 +181,7 @@ class MapPage extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardColor, 
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
                 boxShadow: [
                   BoxShadow(
@@ -179,9 +198,9 @@ class MapPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Jarak ke Kantin",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kTextDark),
+                      Text(
+                        "Rute ke Kantin",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor), 
                       ),
                       InkWell(
                         onTap: () {
@@ -194,10 +213,10 @@ class MapPage extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: isDark ? Colors.grey[800] : Colors.grey[100], 
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.my_location, color: kPinkPrimary),
+                          child: const Icon(Icons.my_location, color: Color.fromARGB(255, 166, 14, 34)),
                         ),
                       ),
                     ],
@@ -208,19 +227,19 @@ class MapPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: kPinkPrimary.withValues(alpha: 0.05),
+                      color: const Color.fromARGB(255, 166, 14, 34).withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: kPinkPrimary.withValues(alpha: 0.1)),
+                      border: Border.all(color: const Color.fromARGB(255, 166, 14, 34).withValues(alpha: 0.1)),
                     ),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: bgColor, 
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.directions_bike, color: kPinkPrimary, size: 28),
+                          child: const Icon(Icons.directions_walk, color: Color.fromARGB(255, 166, 14, 34), size: 28),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -229,13 +248,14 @@ class MapPage extends StatelessWidget {
                             children: [
                               Obx(() => Text(
                                 controller.distanceInfo.value,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16, 
                                   fontWeight: FontWeight.bold, 
-                                  color: kTextDark
+                                  color: textColor // Teks adaptif (sebelumnya kTextDark)
                                 ),
                               )),
                               const SizedBox(height: 4),
+                              const Text("Ikuti garis di peta", style: TextStyle(color: Colors.grey, fontSize: 12)),
                             ],
                           ),
                         ),

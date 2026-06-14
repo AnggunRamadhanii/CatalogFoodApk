@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:flutter_map/flutter_map.dart'; 
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:dio/dio.dart';
+import 'dart:convert'; 
 
 class LocationController extends GetxController {
   final MapController mapController = MapController(); 
@@ -13,6 +15,63 @@ class LocationController extends GetxController {
   var distanceInfo = "Mencari lokasi...".obs;
 
   StreamSubscription<Position>? _positionStreamSubscription;
+  var routePoints = <LatLng>[].obs;
+
+ Future<void> fetchRouteToCanteen() async {
+    if (currentPosition.value == null) {
+      Get.snackbar("Info Rute", "Gagal mengambil rute: Koordinat posisi kamu masih kosong");
+      return;
+    }
+    
+    try {
+      final start = currentPosition.value!;
+      final end = canteenLocation;
+      
+      final String osrmUrl = 'https://router.project-osrm.org/route/v1/foot/'
+          '${start.longitude},${start.latitude};${end.longitude},${end.latitude}'
+          '?geometries=geojson&overview=full';
+      
+      String finalUrl = osrmUrl;
+      if (GetPlatform.isWeb) {
+        finalUrl = 'https://api.allorigins.win/raw?url=${Uri.encodeComponent(osrmUrl)}';
+      }
+      
+      final response = await Dio().get(finalUrl);
+      
+      if (response.statusCode == 200) {
+        var data = response.data;
+        
+        if (data is String) {
+          data = jsonDecode(data);
+        }
+
+        if (data['routes'] != null && data['routes'].isNotEmpty) {
+          final coordinates = data['routes'][0]['geometry']['coordinates'] as List;
+          
+          routePoints.value = coordinates.map((c) => LatLng(c[1], c[0])).toList();
+          
+          Get.snackbar(
+            "Info Rute", 
+            "Berhasil memuat rute jalan raya belok-belok!",
+            backgroundColor: Colors.green.withOpacity(0.8),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.TOP,
+          );
+        } else {
+          Get.snackbar("Info Rute", "API merespon, tapi tidak ditemukan jalan kaki ke arah kantin");
+        }
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Gagal Memuat Rute", 
+        "Detail Error: $e",
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        duration: const Duration(seconds: 7),
+      );
+    }
+  }
 
   final LatLng canteenLocation = const LatLng(-7.921529, 112.597288); 
 

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:catalogfood/app/ui/pages/profile_view.dart';
 import 'package:catalogfood/app/controllers/product_controller.dart';
 import 'package:catalogfood/app/ui/widgets/product_card.dart';
 import 'package:catalogfood/app/ui/pages/cart_page.dart';
 import 'package:catalogfood/app/ui/pages/map_page.dart'; 
-import 'package:catalogfood/app/ui/widgets/auth_components.dart'; 
-import 'package:firebase_messaging/firebase_messaging.dart'; 
-import 'package:flutter/services.dart'; 
+
+const Color kTargetRed = Color(0xFF8A0014); 
+
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
@@ -17,7 +18,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
+      
       body: SafeArea(
         child: Column(
           children: [
@@ -28,54 +29,14 @@ class HomePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 20),
-                    
-                    _buildSearchBar(),
-                    
-                    const SizedBox(height: 20),
-                    _buildPromoBanner(),
+                    _buildHeadline(context),
+                    const SizedBox(height: 16),
+                    _buildSearchRow(context),
                     const SizedBox(height: 24),
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Kategori", 
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kTextDark)
-                          ),
-                          
-                          GestureDetector(
-                            onTap: () => Get.to(() => MapPage()), 
-                            child: Row(
-                              children: [
-                                Icon(Icons.map_outlined, color: kPinkPrimary, size: 18),
-                                const SizedBox(width: 4),
-                                Text(
-                                  "Lihat Peta", 
-                                  style: TextStyle(color: kPinkPrimary, fontWeight: FontWeight.bold)
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-                    _buildCategoryList(),
+                    _buildCategoryList(context),
                     const SizedBox(height: 24),
-
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
-                      child: Text("Rekomendasi Untukmu", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kTextDark)),
-                    ),
-                    const SizedBox(height: 12),
-
                     _buildProductGrid(),
-                    
-                    const SizedBox(height: 80), 
+                    const SizedBox(height: 40), 
                   ],
                 ),
               ),
@@ -86,152 +47,154 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // --- HEADER ---
-  Widget _buildHeader(BuildContext context) {
-    return Container(
+ Widget _buildHeader(BuildContext context) {
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      color: Colors.white,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Halo, Anggun! 👋", style: TextStyle(color: Colors.grey, fontSize: 14)),
-              SizedBox(height: 4),
-              Text("Mau makan apa?", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kTextDark)),
-            ],
+          GestureDetector(
+            onTap: () {
+              Get.to(() => const ProfileView());
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 22,
+                
+                backgroundColor: Theme.of(context).cardColor, 
+                
+                child: Icon(Icons.person_rounded, color: Theme.of(context).iconTheme.color, size: 24),
+              ),
+            ),
           ),
           
           Row(
             children: [
-               // --- TOMBOL RAHASIA COPY TOKEN (DEBUG) ---
-              IconButton(
-                icon: const Icon(Icons.token, color: kPinkPrimary),
-                onPressed: () async {
-                  // Ambil token
-                  String? token = await FirebaseMessaging.instance.getToken();
-                  
-                  // Gunakan debugPrint agar token panjang TIDAK TERPOTONG di console
-                  debugPrint("\n==================================");
-                  debugPrint("FCM TOKEN:");
-                  debugPrint(token);
-                  debugPrint("==================================\n");
-                  
-                  // Copy ke Clipboard HP
-                  if (token != null) {
-                    await Clipboard.setData(ClipboardData(text: token));
-                    Get.snackbar("Token Disalin!", "Cek Debug Console VS Code");
-                  }
-                },
-              ),
-              // ---------------------------------
-
-              IconButton(
-                icon: const Icon(Icons.logout, color: kTextDark),
-                onPressed: () => controller.logout(),
-              ),
-
-              const SizedBox(width: 8),
-
-              GestureDetector(
-                onTap: () => Get.to(() => CartPage()),
-                child: Stack(
+              Obx(() {
+                int totalItem = controller.totalCartItems.value;
+                return Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
-                      child: const Icon(Icons.shopping_cart_outlined, color: kTextDark),
+                    IconButton(
+                      icon: Icon(Icons.shopping_cart_outlined, color: Theme.of(context).iconTheme.color, size: 26), 
+                      onPressed: () => Get.to(() => CartPage()),
                     ),
-                    Obx(() => controller.cart.isNotEmpty
-                        ? Positioned(
-                            right: -5, top: -5,
-                            child: Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(color: kPinkPrimary, shape: BoxShape.circle),
-                              child: Text('${controller.cart.length}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                    if (totalItem > 0) 
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(color: kTargetRed, shape: BoxShape.circle),
+                          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                          child: Center(
+                            child: Text(
+                              "$totalItem",
+                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                             ),
-                          )
-                        : const SizedBox()),
+                          ),
+                        ),
+                      ),
                   ],
-                ),
+                );
+              }),
+              const SizedBox(width: 4),
+              IconButton(
+                icon: Icon(Icons.notifications_none_outlined, color: Theme.of(context).iconTheme.color, size: 26),
+                onPressed: () {},
               ),
             ],
-          )
+          ),
         ],
       ),
     );
   }
 
-  // --- SEARCH BAR ---
-  Widget _buildSearchBar() {
+  Widget _buildHeadline(BuildContext context) {
+    
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(color: Colors.grey.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
+      child: RichText(
+        text: TextSpan(
+          text: "Choose\n",
+          style: TextStyle(fontSize: 22, color: textColor, height: 1.2, fontWeight: FontWeight.w500),
+          children: [
+            TextSpan(
+              text: "Your Favorite ",
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: textColor),
+            ),
+            const TextSpan(
+              text: "Food",
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: kTargetRed), 
+            ),
           ],
-        ),
-        child: TextField(
-          onChanged: (value) {
-            controller.searchText.value = value;
-          },
-          decoration: const InputDecoration(
-            hintText: "Cari nasi goreng, ayam...",
-            hintStyle: TextStyle(color: Colors.grey),
-            prefixIcon: Icon(Icons.search, color: Colors.grey),
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(vertical: 14),
-          ),
         ),
       ),
     );
   }
 
-  // --- PROMO BANNER ---
-  Widget _buildPromoBanner() {
+  Widget _buildSearchRow(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        width: double.infinity,
-        height: 140,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [kPinkPrimary, kPinkPrimary.withValues(alpha: 0.7)]),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -20, bottom: -20,
-              child: Icon(Icons.fastfood, size: 120, color: Colors.white.withValues(alpha: 0.2)),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Diskon 50%", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                  Text("Khusus Pengguna Baru", style: TextStyle(color: Colors.white, fontSize: 14)),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor, 
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4)),
                 ],
               ),
+              child: TextField(
+                onChanged: (value) => controller.searchText.value = value,
+                
+                decoration: const InputDecoration(
+                  hintText: "Search",
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
+                  prefixIcon: Icon(Icons.search_rounded, color: Colors.grey, size: 22),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: () => Get.to(() => MapPage()),
+            child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+            color: kTargetRed,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.location_on_rounded, color: Colors.white, size: 22),
+            ),
+           ),
+        ],
       ),
     );
   }
 
-  // --- KATEGORI LIST ---
-  Widget _buildCategoryList() {
-    final categories = ["Semua", "Makanan", "Minuman", "Snack", "Pedas"];
-    
+  Widget _buildCategoryList(BuildContext context) {
+    final categories = ["All", "Main Course", "Dessert", "Snack", "Drinks"];
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+
     return SizedBox(
-      height: 40,
+      height: 38,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         scrollDirection: Axis.horizontal,
@@ -239,28 +202,32 @@ class HomePage extends StatelessWidget {
         separatorBuilder: (ctx, i) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final categoryName = categories[index];
-          
           return Obx(() {
-            bool isActive = controller.selectedCategory.value == categoryName;
-            
+            bool isActive = controller.selectedCategory.value == categoryName || 
+                            (categoryName == "All" && controller.selectedCategory.value == "Semua");
             return GestureDetector(
-              onTap: () => controller.changeCategory(categoryName),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              onTap: () {
+                if (categoryName == "All") {
+                  controller.changeCategory("Semua");
+                } else {
+                  controller.changeCategory(categoryName);
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: BoxDecoration(
-                  color: isActive ? kPinkPrimary : Colors.white,
+                  color: isActive ? kTargetRed : Theme.of(context).cardColor, 
                   borderRadius: BorderRadius.circular(20),
-                  border: isActive ? null : Border.all(color: Colors.grey.shade200),
-                  boxShadow: isActive 
-                    ? [BoxShadow(color: kPinkPrimary.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 4))] 
-                    : [],
+                  border: isActive ? null : Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                 ),
-                child: Text(
-                  categoryName,
-                  style: TextStyle(
-                    color: isActive ? Colors.white : Colors.grey,
-                    fontWeight: FontWeight.bold,
+                child: Center(
+                  child: Text(
+                    categoryName,
+                    style: TextStyle(
+                      color: isActive ? Colors.white : textColor, 
+                      fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ),
@@ -271,49 +238,136 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // --- GRID PRODUK ---
   Widget _buildProductGrid() {
     return Obx(() {
       if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: CircularProgressIndicator(color: kTargetRed));
       }
 
       final displayProducts = controller.filteredProducts;
 
       if (displayProducts.isEmpty) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Text("Menu tidak ditemukan 😔", style: TextStyle(color: Colors.grey)),
+        return const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          child: Center(
+            child: Text("Menu tidak ditemukan", style: TextStyle(color: Colors.grey)),
           ),
         );
       }
 
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            int crossAxisCount = 2;
-            if (constraints.maxWidth > 600) crossAxisCount = 3;
-            if (constraints.maxWidth > 900) crossAxisCount = 4;
-
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.72,
-              ),
-              itemCount: displayProducts.length,
-              itemBuilder: (context, index) {
-                return ProductCard(product: displayProducts[index]);
-              },
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(), 
+          itemCount: displayProducts.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,         
+            crossAxisSpacing: 16,      
+            mainAxisSpacing: 16,       
+            childAspectRatio: 0.72,    
+          ),
+          itemBuilder: (context, index) {
+            final product = displayProducts[index];
+            return GestureDetector(
+              onTap: () => _showQuantityBottomSheet(context, product), 
+              child: ProductCard(product: product),
             );
           },
         ),
       );
     });
+  }
+
+  void _showQuantityBottomSheet(BuildContext context, dynamic product) {
+    final RxInt quantity = 1.obs; 
+    
+    
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 45,
+                  height: 5,
+                  decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                product.name ?? "Menu Makanan", 
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor), 
+              ),
+              const SizedBox(height: 6),
+              Text(
+                "Rp ${product.price ?? 0}", 
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: kTargetRed),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Tentukan Jumlah Porsi:", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () { if (quantity.value > 1) quantity.value--; },
+                        icon: const Icon(Icons.remove_circle_outline_rounded, color: kTargetRed, size: 28),
+                      ),
+                      const SizedBox(width: 8),
+                      Obx(() => Text(
+                        "${quantity.value}",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor), 
+                      )),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () => quantity.value++,
+                        icon: const Icon(Icons.add_circle_outline_rounded, color: kTargetRed, size: 28),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kTargetRed,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  ),
+                  onPressed: () {
+                    controller.addItem(product.id);
+                    Get.back(); 
+                    Get.snackbar(
+                      "Berhasil", 
+                      "${quantity.value}x ${product.name} dimasukkan ke keranjang",
+                      snackPosition: SnackPosition.TOP,
+                      backgroundColor: Colors.black87,
+                      colorText: Colors.white,
+                      duration: const Duration(seconds: 2),
+                    );
+                  },
+                  child: const Text("Tambah ke Keranjang", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

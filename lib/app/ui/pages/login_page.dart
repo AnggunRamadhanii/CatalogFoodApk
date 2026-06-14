@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
+import 'package:google_fonts/google_fonts.dart'; 
 import '../../controllers/auth_controller.dart'; 
 import '../widgets/auth_components.dart';
 
@@ -72,22 +72,23 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    const Color kMaroon = Color(0xFF800000); 
+    const Color kWhiteBg = Colors.white; 
+
     return Scaffold(
       backgroundColor: kWhiteBg,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(
-              height: 300,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(60),
-                      ),
+            ClipPath(
+              clipper: LoginWaveClipper(),
+              child: SizedBox(
+                height: 320, 
+                child: Stack(
+                  children: [
+                    Positioned.fill(
                       child: _bgImages.isEmpty
-                          ? Container(color: kPinkGradient1) 
+                          ? Container(color: kMaroon) 
                           : AnimatedSwitcher(
                               duration: const Duration(milliseconds: 1500),
                               child: Image.network(
@@ -96,82 +97,63 @@ class _LoginPageState extends State<LoginPage> {
                                 fit: BoxFit.cover,
                                 width: double.infinity,
                                 height: double.infinity,
-                                errorBuilder: (_, __, ___) => Container(color: kPinkGradient1),
+                                errorBuilder: (context, error, stackTrace) => Container(color: kMaroon),
                               ),
                             ),
                     ),
-                  ),
 
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(60),
-                        ),
-                        gradient: LinearGradient(
-                          colors: [
-                            kPinkGradient1.withOpacity(0.85), 
-                            kPinkGradient2.withOpacity(0.6),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              kMaroon.withAlpha(220), 
+                              kMaroon.withAlpha(160), 
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.25),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/logo.png', 
+                            width: 300, 
+                            height: 300,
+                            fit: BoxFit.contain, 
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.storefront_outlined, size: 75, color: Colors.white);
+                            },
                           ),
-                          child: const Icon(Icons.storefront_outlined, size: 80, color: Colors.white),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          "Kantin App",
-                          style: GoogleFonts.playfairDisplay( // FONT CLASSY
-                            fontSize: 32, 
-                            fontWeight: FontWeight.bold, 
-                            color: Colors.white, 
-                            letterSpacing: 1.2,
-                            shadows: [const Shadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 2))]
-                          ),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                        ], 
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Silakan Masuk", 
-                    style: GoogleFonts.playfairDisplay( 
-                      fontSize: 28, 
-                      fontWeight: FontWeight.bold, 
-                      color: kTextDark
-                    )
+                    "Masuk ke Akun Anda", 
+                    style: GoogleFonts.poppins(   
+                      color: kMaroon,
+                      fontSize: 15,                      
+                      fontWeight: FontWeight.w600,        
+                      letterSpacing: 0.3,                 
+                    ),
                   ),
-                  Text(
-                    "Lanjutkan untuk memesan makanan lezat.", 
-                    style: GoogleFonts.poppins( 
-                      color: Colors.grey,
-                      fontSize: 14,
-                    )
-                  ),
-                  
+
                   const SizedBox(height: 30),
 
                   AuthInput(hint: "Email", icon: Icons.email_outlined, controller: controller.emailC),
@@ -191,21 +173,46 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () {},
                       child: Text(
                         "Lupa Password?", 
-                        style: GoogleFonts.poppins(color: kPinkPrimary, fontWeight: FontWeight.w500)
+                        style: GoogleFonts.poppins(color: kMaroon, fontWeight: FontWeight.w500)
                       ),
                     ),
                   ),
                   
                   const SizedBox(height: 20),
                   
-                  Obx(() => PinkButton(
-                    text: "MASUK",
-                    isLoading: controller.isLoading.value,
-                    onPressed: () => controller.login(),
-
-
-
-                    
+                  Obx(() => SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kMaroon, 
+                        foregroundColor: Colors.white, 
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30), 
+                        ),
+                        elevation: 2,
+                      ),
+                      onPressed: controller.isLoading.value 
+                          ? null 
+                          : () => controller.login(),
+                      child: controller.isLoading.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              "MASUK",
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.1,
+                              ),
+                            ),
+                    ),
                   )),
 
                   const SizedBox(height: 30),
@@ -217,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
                         onTap: () => Get.toNamed('/signup'),
                         child: Text(
                           "Daftar", 
-                          style: GoogleFonts.poppins(color: kPinkPrimary, fontWeight: FontWeight.bold)
+                          style: GoogleFonts.poppins(color: kMaroon, fontWeight: FontWeight.bold)
                         ),
                       ),
                     ],
@@ -230,4 +237,27 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+}
+
+class LoginWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    path.lineTo(0, size.height - 45); 
+
+    var firstStart = Offset(size.width * 0.35, size.height - 75);
+    var firstEnd = Offset(size.width * 0.65, size.height - 30);
+    path.quadraticBezierTo(firstStart.dx, firstStart.dy, firstEnd.dx, firstEnd.dy);
+
+    var secondStart = Offset(size.width * 0.85, size.height - 5);
+    var secondEnd = Offset(size.width, size.height - 40);
+    path.quadraticBezierTo(secondStart.dx, secondStart.dy, secondEnd.dx, secondEnd.dy);
+
+    path.lineTo(size.width, 0); 
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

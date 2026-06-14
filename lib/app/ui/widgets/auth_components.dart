@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-const Color kPinkPrimary = Color(0xFFFF69B4);
-const Color kPinkLight   = Color(0xFFFFC0CB);
-const Color kPinkGradient1 = Color(0xFFFF89C0); // INI WAJIB ADA
-const Color kPinkGradient2 = Color(0xFFFF69B4); // INI WAJIB ADA
-const Color kWhiteBg     = Color(0xFFFAFAFA);
-const Color kTextDark    = Color(0xFF2D2D2D);
+const Color kMaroon = Color(0xFF800000);
+const Color kMaroonLight = Color(0xFFA33333);
+const Color kMaroonGradient1 = Color(0xFF990000);
+const Color kMaroonGradient2 = Color(0xFF660000);
+const Color kWhiteBg = Color(0xFFFAFAFA);
+const Color kTextDark = Color(0xFF2D2D2D);
 
 class AuthInput extends StatelessWidget {
   final String hint;
@@ -45,7 +45,7 @@ class AuthInput extends StatelessWidget {
         controller: controller,
         obscureText: isPassword ? isObscure : false,
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: kPinkPrimary.withOpacity(0.5)),
+          prefixIcon: Icon(icon, color: kMaroon.withOpacity(0.7)),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(isObscure ? Icons.visibility_off : Icons.visibility, color: Colors.grey[400]),
@@ -82,13 +82,13 @@ class PinkButton extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         gradient: const LinearGradient(
-          colors: [kPinkGradient1, kPinkGradient2], 
+          colors: [kMaroonGradient1, kMaroonGradient2], 
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: kPinkPrimary.withOpacity(0.4),
+            color: kMaroon.withOpacity(0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),

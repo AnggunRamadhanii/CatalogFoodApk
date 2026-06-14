@@ -1,3 +1,5 @@
+import 'package:catalogfood/app/controllers/auth_controller.dart';
+import 'package:catalogfood/app/controllers/product_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -35,11 +37,11 @@ void main() async {
     try {
         await FirebaseMessagingHandler().initPushNotification();
     } catch (e) {
-        print("Handler Notifikasi Error (Bisa diabaikan di Web/Windows): $e");
+        print("$e");
     }
     
   } catch (e) {
-    print("Error Init Firebase (Bisa diabaikan jika belum setup): $e");
+    print("$e");
   }
 
   await Get.putAsync(() async => await SharedPreferences.getInstance());
@@ -47,19 +49,18 @@ void main() async {
   try {
     await dotenv.load(fileName: ".env"); 
   } catch (e) {
-    print("Dotenv load error (ignored): $e");
+    print("$e");
   }
-
+  Get.lazyPut(() => ProductController(), fenix: true);
+  Get.lazyPut(() => AuthController(), fenix: true);
   await Supabase.initialize(
-    url: 'https://tbphwtbqumrtekqcmvep.supabase.co', 
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRicGh3dGJxdW1ydGVrcWNtdmVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNDA1OTgsImV4cCI6MjA3OTkxNjU5OH0.wj8b6ojLnAm5rO7LHr0HkTM-zE2f4U_c4bVQukULhdU', 
+    url: 'https://dbcyjlaakegpbidqiuox.supabase.co', 
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRiY3lqbGFha2VncGJpZHFpdW94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNzY5NjAsImV4cCI6MjA5Njc1Mjk2MH0.kwwUp61VJXbGHob1n0eCJuHkBD-0zRnhmRUafnuusaM', 
   );
 
-  await Get.putAsync<ThemeService>(() async {
-    final service = ThemeService();
-    await service.init(); 
-    return service;
-  });
+  final service = ThemeService();
+  await service.init();
+  Get.put<ThemeService>(service);
 
   runApp(const MyApp());
 }
@@ -69,19 +70,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     final ThemeService themeService = Get.find<ThemeService>();
 
     return GetMaterialApp(
       title: 'Kantin App',
       debugShowCheckedModeBanner: false,
-      
-      
-      initialRoute: '/splash', 
-      
+      initialRoute: '/', 
       getPages: [
-        GetPage(name: '/splash', page: () => const SplashPage()),
-        
+        GetPage(name: '/', page: () => const SplashPage()),
         GetPage(name: '/login', page: () => const LoginPage()),
         GetPage(name: '/signup', page: () => const SignupPage()),
         GetPage(name: '/home', page: () => HomePage()),
@@ -89,7 +85,6 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/map', page: () => MapPage()), 
         GetPage(name: '/promo', page: () => const NotificationPage()),
       ],
-      
       theme: CustomThemes.light, 
       darkTheme: CustomThemes.dark, 
       themeMode: themeService.theme, 
