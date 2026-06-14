@@ -26,12 +26,15 @@ This application was developed to solve the inefficiencies of the manual orderin
 
 ## 👥 User Roles
 This application supports functional separation based on access rights:
+
 **User Role (Customer):** 
 1. Has access to create an account
 2. Browse the menu catalog
 3. Manage the shopping cart
 4. Track location on the map
 5. Proceed to checkout/payment.
+
+   
 **Admin Role (Cafeteria Manager):**
 1. Has special authority to validate incoming order payments by changing the status from `PENDING` to `PAID` within the Admin Dashboard or
    Supabase database.
